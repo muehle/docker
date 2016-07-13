@@ -35,4 +35,4 @@ RUN chmod +x /usr/local/bin/confd \
 
 EXPOSE 80 443
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["/usr/local/bin/confd-watch"]
