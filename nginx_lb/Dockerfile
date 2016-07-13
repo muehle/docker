@@ -29,9 +29,10 @@ ADD https://github.com/kelseyhightower/confd/releases/download/v0.11.0/confd-0.1
 ADD nginx.toml /etc/confd/conf.d/nginx.toml
 ADD nginx.tmpl /etc/confd/templates/nginx.tmpl
 ADD confd-watch /usr/local/bin/confd-watch
-RUN chmod +x /usr/local/bin/confd \
-	&& chmod +x /usr/local/bin/confd-watch \
-	&& rm -f /etc/nginx/sites-enabled/default
+RUN chmod +x /usr/local/bin/confd
+RUN chmod +x /usr/local/bin/confd-watch
+RUN rm -rf /etc/nginx/sites-enabled
+RUN mkdir /etc/nginx/sites-enabled
 
 EXPOSE 80 443
 
