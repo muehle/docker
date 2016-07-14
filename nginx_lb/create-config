@@ -1,0 +1,73 @@
+#!/bin/bash
+
+#SERVICES="Services1:domain1.com domain2.com;Service2:domain3.com domain4.com"
+rm -f /etc/confd/templates/nginx.tmpl /etc/confd/conf.d/nginx.toml
+
+IFS=';' read -ra SERVICE <<< "$SERVICES"
+
+keys="["
+
+for i in "${SERVICE[@]}"; do
+
+	IFS=':' read -ra DETAIL_SERVICE <<< "$i"
+
+	keys+="\"/services/"${DETAIL_SERVICE[0]}"\","
+    echo "Adding Service: ${DETAIL_SERVICE[1]}=>${DETAIL_SERVICE[0]}"
+
+    cat <<EOF >> /etc/confd/templates/nginx.tmpl
+		{{ if ls "/services/${DETAIL_SERVICE[0]:-apache}"}}
+
+		    upstream ${DETAIL_SERVICE[0]:-apache}_pool {
+		    {{ range getvs "/services/${DETAIL_SERVICE[0]:-apache}/*" }}
+		        server {{ . }};
+		    {{ end }}
+		    }
+
+		    server {
+		        listen 80 default_server;
+		        listen [::]:80 default_server ipv6only=on;
+		        server_name ${DETAIL_SERVICE[1]:-_};
+
+		        access_log /var/log/nginx/access.log upstreamlog;
+
+		        location / {
+		            proxy_pass http://${DETAIL_SERVICE[0]}_pool;
+		            proxy_redirect off;
+		            proxy_set_header Host $host;
+		            proxy_set_header X-Real-IP $remote_addr;
+		            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		        }
+		    }
+
+		{{end}}
+EOF
+
+done
+
+unset IFS
+
+keys+="]"
+
+cat <<EOF >> /etc/confd/conf.d/nginx.toml
+	[template]
+
+	# The name of the template that will be used to render the application's configuration file
+	# Confd will look in \`/etc/conf.d/templates\` for these files by default
+	src = "nginx.tmpl"
+
+	# The location to place the rendered configuration file
+	dest = "/etc/nginx/sites-enabled/app.conf"
+
+	# The etcd keys or directory to watch.  This is where the information to fill in
+	# the template will come from.
+	keys = $keys
+
+	# File ownership and mode information
+	owner = "root"
+	mode = "0644"
+
+	# These are the commands that will be used to check whether the rendered config is
+	# valid and to reload the actual service once the new config is in place
+	check_cmd = "/usr/sbin/nginx -t"
+	reload_cmd = "/usr/sbin/service nginx reload"
+EOF
