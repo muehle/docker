@@ -6,7 +6,7 @@ export ETCD_PORT=${ETCD_PORT:-4001}
 export HOST_IP=${HOST_IP:-172.17.42.1}
 export ETCD=$HOST_IP:$ETCD_PORT
 
-sed -i 's/${SERVICE_NAME}/'"${SERVICE_NAME:-APACHE}/g" /etc/confd/conf.d/nginx.toml /etc/confd/templates/nginx.tmpl
+create-config
 
 echo "[nginx] booting container. ETCD: $ETCD."
 
