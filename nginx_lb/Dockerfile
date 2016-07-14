@@ -30,6 +30,7 @@ ADD create-config /usr/local/bin/create-config
 ADD confd-watch /usr/local/bin/confd-watch
 RUN chmod +x /usr/local/bin/confd
 RUN chmod +x /usr/local/bin/confd-watch
+RUN chmod +x /usr/local/bin/create-config
 RUN rm -rf /etc/nginx/sites-enabled
 RUN mkdir /etc/nginx/sites-enabled
 RUN mkdir -p /etc/confd/{conf.d,templates}
