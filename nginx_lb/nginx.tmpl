@@ -1,7 +1,9 @@
-{{ if ls "/services/${SERVICE_NAME:-apache}"}}
+{{ $SERVICE_NAME:= getenv "SERVICE_NAME" "APACHE"}}
 
-    upstream ${SERVICE_NAME:-apache}_pool {
-    {{ range getvs "/services/${SERVICE_NAME:-apache}/*" }}
+{{ if ls "/services/{{.$SERVICE_NAME}}"}}
+
+    upstream {{.$SERVICE_NAME}}_pool {
+    {{ range getvs "/services/{{.$SERVICE_NAME}}/*" }}
         server {{ . }};
     {{ end }}
     }
@@ -13,7 +15,7 @@
         access_log /var/log/nginx/access.log upstreamlog;
 
         location / {
-            proxy_pass http://${SERVICE_NAME:-apache}_pool;
+            proxy_pass http://{{.$SERVICE_NAME}}_pool;
             proxy_redirect off;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
