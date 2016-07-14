@@ -26,8 +26,7 @@ RUN ln -sf /dev/stdout /var/log/nginx/access.log \
 
 ADD nginx.conf /etc/nginx/nginx.conf
 ADD https://github.com/kelseyhightower/confd/releases/download/v0.11.0/confd-0.11.0-linux-amd64 /usr/local/bin/confd
-ADD nginx.toml /etc/confd/conf.d/nginx.toml
-ADD nginx.tmpl /etc/confd/templates/nginx.tmpl
+ADD create-config /usr/local/bin/create-config
 ADD confd-watch /usr/local/bin/confd-watch
 RUN chmod +x /usr/local/bin/confd
 RUN chmod +x /usr/local/bin/confd-watch
